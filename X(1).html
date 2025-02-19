@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earn Coins - Monetag Ads</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .card {
+            background-color: white;
+            padding: 20px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #ad-container {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1> Watch Ads & Earn Coins! </h1>
+
+        <!--   -->
+        <div class="card">
+            <h2>Your Coins: <span id="coinCount">0</span></h2>
+        </div>
+
+        <!--  -->
+        <div class="card">
+            <h3>Watch an Ad & Earn 100 Coins</h3>
+            <div id="ad-container">
+                <!-- Monetag Ads Integration -->
+                <script src="//whephiwums.com/vignette.min.js" data-zone="8955542" async></script>
+            </div>
+            <button id="watchAdBtn" class="button" onclick="showAd()"> Watch Ad</button>
+        </div>
+
+    </div>
+
+    <script>
+        let coinCount = 0;
+
+        function showAd() {
+            // Monetag     
+            let adScript = document.createElement('script');
+            adScript.src = "//whephiwums.com/vignette.min.js";
+            adScript.setAttribute('data-zone', '8955542');
+            document.body.appendChild(adScript);
+
+            //         
+            document.getElementById('watchAdBtn').disabled = true;
+            setTimeout(() => {
+                coinCount += 100; //       
+                document.getElementById('coinCount').textContent = coinCount;
+                alert(" You earned 100 coins!");
+                document.getElementById('watchAdBtn').disabled = false;
+            }, 30000); // 30     
+        }
+    </script>
+
+</body>
+</html>
