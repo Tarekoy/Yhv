@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Reward & Referral System</title>
+    <!-- Monetag Ad Script -->
+    <script src='//whephiwums.com/sdk.js' data-zone='8982453' data-sdk='show_8982453'></script> 
+    <style>
+        /* Existing styles */
+        .stats {
+            margin: 15px 0;
+            padding: 10px;
+            background: #444;
+            border-radius: 8px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        #watchAd {
+            background: linear-gradient(135deg, #ff7eb3, #ff758c);
+            color: white;
+        }
+
+        #withdraw {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+
+        button:disabled {
+            background: #888;
+            cursor: not-allowed;
+        }
+
+        /* Referral Link Style */
+        #referralLink {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 16px;
+            color: #007bff;
+        }
+
+        #referralLink:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+
+        /* Styling for the referral section */
+        .referral {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Earn from Ads & Referrals</h2>
+        <p>Watch ads & refer friends to earn money!</p>
+        
+        <div class="progress-circle">
+            <span id="balance">0</span> Taka
+        </div>
+
+        <div class="stats">
+            <p>Total Tasks: <span id="totalTasks">0</span></p>
+            <p>Daily Tasks: <span id="dailyTasks">0</span>/30</p>
+        </div>
+
+        <button id="watchAd">Watch Ad</button>
+        <button id="withdraw" disabled>Withdraw (Min 100৳)</button>
+
+        <div class="referral">
+            <p>Invite Friends via Telegram Bot!</p>
+            <input type="text" id="referralLink" readonly>
+            <button onclick="copyReferral()">Copy Link</button>
+        </div>
+    </div>
+
+    <script>
+        let balance = parseFloat(localStorage.getItem("userBalance")) || 0;
+        let userId = localStorage.getItem("userId") || Math.random().toString(36).substr(2, 9);
+        let totalTasks = parseInt(localStorage.getItem("totalTasks")) || 0;
+        let dailyTasks = parseInt(localStorage.getItem("dailyTasks")) || 0;
+        let lastTaskDate = localStorage.getItem("lastTaskDate") || "";
+        
+        const TELEGRAM_BOT_TOKEN = "8027805011:AAHNnRgy-ir09oHN3uSsWYSLS7NyO6ZyJhU";
+        const TELEGRAM_CHAT_ID = "@Monetagadminbot";
+
+        // Initialize referral link
+        document.getElementById("referralLink").value = `https://t.me/Monetagadminbot?start=${userId}`;
+
+        // Update task counters display
+        function updateTaskDisplay() {
+            document.getElementById("totalTasks").textContent = totalTasks;
+            document.getElementById("dailyTasks").textContent = dailyTasks;
+            document.getElementById("watchAd").disabled = dailyTasks >= 30;
+        }
+
+        // Check daily task reset
+        function checkDailyReset() {
+            const today = new Date().toISOString().split('T')[0];
+            if (lastTaskDate !== today) {
+                dailyTasks = 0;
+                lastTaskDate = today;
+                localStorage.setItem("dailyTasks", dailyTasks);
+                localStorage.setItem("lastTaskDate", lastTaskDate);
+            }
+        }
+
+        // Watch Ad functionality
+        document.getElementById("watchAd").addEventListener("click", function() {
+            checkDailyReset();
+            
+            if (dailyTasks >= 30) {
+                alert("Daily limit reached! Come back tomorrow.");
+                return;
+            }
+
+            if (typeof show_8982453 === "function") { 
+                show_8982453().then(() => {
+                    balance += 0.5;  // Earn 0.5 Taka per ad
+                    totalTasks += 1;
+                    dailyTasks += 1;
+                    
+                    localStorage.setItem("userBalance", balance);
+                    localStorage.setItem("totalTasks", totalTasks);
+                    localStorage.setItem("dailyTasks", dailyTasks);
+                    
+                    updateBalanceDisplay();
+                    updateTaskDisplay();
+                    alert("Ad viewed! Earned 0.5৳");
+                }).catch(err => {
+                    alert("Ad failed to load.");
+                });
+            } else {
+                alert("Ad is not ready yet.");
+            }
+        });
+
+        // Withdraw functionality
+        document.getElementById("withdraw").addEventListener("click", function() {
+            if (balance >= 100) {
+                const bkash = prompt("Enter your bKash number:");
+                const bkashRegex = /^[0-9]{11}$/;  // bKash number validation (11 digits)
+
+                if (bkash && bkashRegex.test(bkash)) {
+                    const message = `🚀 Withdraw Request\nUser: ${userId}\nAmount: ${balance}৳\nBkash: ${bkash}`;
+                    fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(message)}`)
+                        .then(() => {
+                            balance = 0;
+                            localStorage.setItem("userBalance", balance);
+                            updateBalanceDisplay();
+                            alert("Withdraw request sent!");
+                        })
+                        .catch(() => alert("Error sending request"));
+                } else {
+                    alert("Invalid bKash number! Please enter a valid 11-digit number.");
+                }
+            } else {
+                alert("Minimum withdrawal 100৳");
+            }
+        });
+
+        function updateBalanceDisplay() {
+            document.getElementById("balance").textContent = balance;
+            document.getElementById("withdraw").disabled = balance < 100;
+        }
+
+        // Copy referral link
+        function copyReferral() {
+            const referralLink = document.getElementById("referralLink");
+            referralLink.select();
+            document.execCommand("copy");
+            alert("Referral link copied!");
+        }
+
+        // Initial setup
+        checkDailyReset();
+        updateBalanceDisplay();
+        updateTaskDisplay();
+    </script>
+</body>
+</html>
